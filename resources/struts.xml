@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+<!-- 	<constant name="struts.devMode" value="true" /> -->
+<!-- 	<constant name="struts.action.extension" value="action"/> -->
+<!-- 	<constant name="struts.action.excludePattern" value="/*.jsp"/> -->
+    <package  name="ssh" extends="struts-default" namespace="/">
+        
+<!--         <global-results> -->
+<!--         	<result name="Exception">/error.jsp</result> -->
+<!--         	<result name="SQLException">/error.jsp</result> -->
+<!--         </global-results> -->
+<!--         <global-exception-mappings> -->
+<!--         	<exception-mapping result="SQLException" exception="java.sql.SQLException"></exception-mapping> -->
+<!--         	<exception-mapping result="Exception" exception="java.lang.Exception"></exception-mapping> -->
+<!--         </global-exception-mappings> -->
+<!--         <action name="user" class="com.ssh.action.RegisterAction"> -->
+            
+<!--             <result name="success">/success.jsp</result> -->
+<!--             <result name="error">/fail.jsp</result> -->
+<!--         </action> -->
+        <action name="login" class="com.ssh.action.LoginAction">
+            
+            <result name="success">/main.jsp</result>
+            <result name="error">/error.jsp</result>
+        </action>
+        <action name="user!*" class="com.ssh.action.UserAction" method="{1}">
+        	<result name="list">/admin/adminlist.jsp</result>
+        	<result name="success">/main.jsp</result>
+            <result name="error">/fail.jsp</result>
+        </action>
+        <action name="role!*" class="com.ssh.action.RoleAction" method="{1}">
+        	<result name="list">/role/rolelist.jsp</result>
+        </action>
+    </package>
+    <package name="test" extends="json-default">
+        <action name="test" class="com.ssh.action.TestTreeAction">
+            <result type="json" name="nodes"></result>
+        </action>
+        <action name="resource" class="com.ssh.action.ResourceAction">
+        	<result type="json" name="nodes"></result>
+        </action>
+        <action name="usergrid" class="com.ssh.action.UserGridAction">
+        	<result type="json" name="userlist"></result>
+        </action>
+        <action name="rolegrid" class="com.ssh.action.RoleGridAction">
+        	<result type="json" name="rolelist"></result>
+        </action>
+    </package>
+</struts>

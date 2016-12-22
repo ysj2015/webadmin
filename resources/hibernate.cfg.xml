@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+ 	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+
+		<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+		<property name="jdbc.batch_size">20</property>
+		<property name="connection.autocommit">true</property>
+
+		<!-- 显示sql语句 -->
+		<property name="show_sql">true</property>
+		<property name="connection.useUnicode">true</property>
+		<property name="connection.characterEncoding">UTF-8</property>
+
+		<!-- 缓存设置 -->
+		<!-- 配置二级缓存 --> 
+		<property name="hibernate.cache.provider_configuration_file_resource_path">/ehcache.xml</property> 
+        <property name="hibernate.cache.use_second_level_cache">true</property>  
+        <property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>  	
+		<!--hibernate3.0配置缓存 <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>-->
+		<property name="cache.use_query_cache">true</property>
+
+
+		<!-- 指定自动生成数据表的策略yh -->
+		<property name="hibernate.hbm2ddl.auto">create</property>
+		<!-- 报错总是说不能在没有活动的事务中执行 此session不是Spring托管的session， 所以获取的session是在spring代理的上下文之外的的当前线程之中，所以此session并非事务管理器代理的那个session，不会自动开启事务 
+			<property name="current_session_context_class">thread</property> -->
+	</session-factory>
+</hibernate-configuration>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="  
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<!-- 加载数据库属性配置文件 -->
+	<context:property-placeholder location="classpath:db.properties" />
+
+	<!-- 数据库连接池（数据源） c3p0配置 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="jdbcUrl" value="${db.url}"></property>
+		<property name="driverClass" value="${db.driverClassName}"></property>
+		<property name="user" value="${db.username}"></property>
+		<property name="password" value="${db.password}"></property>
+		<property name="maxPoolSize" value="40"></property>
+		<property name="minPoolSize" value="1"></property>
+		<property name="initialPoolSize" value="1"></property>
+		<property name="maxIdleTime" value="20"></property>
+	</bean>
+
+	<!-- session工厂 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>com/ssh/bean/Node.hbm.xml</value>
+				<value>com/ssh/bean/User.hbm.xml</value>
+				<value>com/ssh/bean/Role.hbm.xml</value>
+			</list>
+		</property>
+<!-- 		<property name="configLocation" value="classpath:hibernate.cfg.xml" /> -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+		<!-- 自动扫描注解方式配置的hibernate类文件 -->
+		<!-- <property name="packagesToScan">
+			<list>
+				<value>com.ssh.bean</value>
+			</list>
+		</property> -->
+	</bean>
+	<!-- 自动加载构建bean -->
+	<context:component-scan base-package="com.ssh.*" />
+
+	<!-- 3 声明事务管理器(实际上,事务管理器就是一个切面),事务管理器将在获取连接时,返回一个打开事务的连接 -->
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<!-- 注入session工厂,spring的jdbc事务管理器在管理事务时,依赖于JDBC的事务管理机制 -->
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	<!-- 4 配置事务通知 id="advice":该属性的值就是通知的唯一标识 transaction-manager:表示通知织入哪个切面 -->
+	<!-- <tx:advice id="txAdvice" transaction-manager="transactionManager">
+		定义事务传播属性
+		tx:method的属性: * name 是必须的,表示与事务属性关联的方法名(业务方法名),对切入点进行细化。通配符（*）可以用来指定一批关联到相同的事务属性的方法。 
+			如：'get*'、'handle*'、'on*Event'等等. * propagation 不是必须的 ，默认值是REQUIRED 表示事务传播行为, 
+			包括REQUIRED,SUPPORTS,MANDATORY,REQUIRES_NEW,NOT_SUPPORTED,NEVER,NESTED * isolation 
+			不是必须的 默认值DEFAULT 表示事务隔离级别(数据库的隔离级别) * timeout 不是必须的 默认值-1(永不超时) 表示事务超时的时间（以秒为单位） 
+			* read-only 不是必须的 默认值false不是只读的 表示事务是否只读？（只读就不会提交事务） * rollback-for 不是必须的 
+			表示将被触发进行回滚的 Exception(s)；以逗号分开。 如：'com.foo.MyBusinessException,ServletException' 
+			* no-rollback-for 不是必须的 表示不被触发进行回滚的 Exception(s)；以逗号分开。 如：'com.foo.MyBusinessException,ServletException' 
+			任何 RuntimeException 将触发事务回滚，但是任何 checked Exception 将不触发事务回滚
+		<tx:attributes>
+			<tx:method name="regist" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="login*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="edit*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="send*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="new*" propagation="REQUIRED" />
+			<tx:method name="set*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="change*" propagation="REQUIRED" />
+			<tx:method name="get*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="select*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="find*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="load*" propagation="REQUIRED" read-only="true" />
+			其他的方法为只读的
+			<tx:method name="*" propagation="REQUIRED" read-only="true" />
+		</tx:attributes>
+	</tx:advice> -->
+
+</beans>
